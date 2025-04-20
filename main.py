@@ -1,4 +1,29 @@
 import copy 
+import heapq
+
+class Node: 
+    def __init__(self, id: int, start: int, end: int, weight: int, selected):
+        self.id = id
+        self.start = start 
+        self.end = end 
+        self.weight = weight
+        self.selected = selected[:]
+
+class DecisionTree:
+    def __init__(self):
+        self.heap = []
+    
+    def push(self, node: Node):
+        heapq.heappush(self.heap, (-node.weight, node.id, node))
+    
+    def pop(self):
+        if self.heap:
+            _,_, node = heapq.heappop(self.heap)
+            return node 
+        return None
+    
+    def empty(self):
+        return not self.heap
 
 class SchedulingSolver:
     """
@@ -42,13 +67,12 @@ class SchedulingSolver:
         :rtype: List[int]
         """
         solution = []
-        memoCopy = memo[:]
         
         for i in range(self.n):
             if (i == self.n - 1):
                 solution.append(i)
             else:
-                if (memoCopy[i] == memoCopy[i+1] + jobs[i][2]):
+                if (memo[i] == memo[i+1] + jobs[i][2]):
                     solution.append(i)
                     i = self.find_next_available(jobs, i)
         
@@ -71,6 +95,8 @@ class SchedulingSolver:
         2. Taking the ith job: the profit is the sum of the job's value and the best profit 
         at the next job that does not conflict with the ith one. If there are no such jobs, 
         then profit will just be the ith job's value. 
+        
+        Time complexity: O(n^2)
 
         :rtype: Tuple[int, List[int]]
         """
@@ -99,8 +125,42 @@ class SchedulingSolver:
 
         :rtype: Tuple[int, List[int]]
         """
+        # Sort jobs by start time
+        jobs = sorted(zip(self.startTime, self.endTime, self.weight), key=lambda v: v[0])
+        print(jobs)
+        tree = DecisionTree()
         
-        return (0, [])
+        root = Node(-1, 0, 0, 0, [])
+        
+        tree.push(root)
+        
+        max_profit = 0
+        solution = []
+        
+        while not tree.empty(): 
+            # Current cumulative set of jobs 
+            span = tree.pop()
+            
+            for i, job in enumerate(jobs):
+                # Make sure not to re-select jobs that have been in the schedule
+                if i != span.id and i not in span.selected:
+                    # If this job does not conflict
+                    if (job[0] >= span.end):
+                        if (span.weight + job[2] > max_profit):
+                            solution = copy.deepcopy(span.selected + [i])
+                            
+                        max_profit = max(max_profit, span.weight + job[2])
+                        
+                        child = Node(i, 
+                                     min(job[0], span.start), 
+                                     max(job[1], span.end),
+                                     span.weight + job[2],
+                                     span.selected + [i])
+                        
+                        tree.push(child)
+
+        return (max_profit, solution)
+        
 
 if __name__ == "__main__":
     startTimes = [1,1,1]
@@ -109,4 +169,4 @@ if __name__ == "__main__":
 
     solver = SchedulingSolver(startTimes, endTimes, profit)
 
-    print(solver.dp())
+    print(solver.branch_and_bound())
