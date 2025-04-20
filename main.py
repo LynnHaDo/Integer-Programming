@@ -1,3 +1,5 @@
+import copy 
+
 class SchedulingSolver:
     """
     Given n tasks with start time, end time and a weight associated with each,
@@ -29,6 +31,29 @@ class SchedulingSolver:
             if (jobs[j][0] >= jobs[i][1]):
                 return j
         return -1
+    
+    def dp_reconstruct_solution(self, jobs, memo):
+        """
+        Reconstruct the solution from the memoization table
+        
+        :type jobs: List[Tuple[int, int, int]]
+        :type memo: List[int]
+        
+        :rtype: List[int]
+        """
+        solution = []
+        memoCopy = memo[:]
+        
+        for i in range(self.n):
+            if (i == self.n - 1):
+                solution.append(i)
+            else:
+                if (memoCopy[i] == memoCopy[i+1] + jobs[i][2]):
+                    solution.append(i)
+                    i = self.find_next_available(jobs, i)
+        
+        return solution
+                
 
     def dp(self):
         """
@@ -65,7 +90,7 @@ class SchedulingSolver:
             # Memoize it
             memo[i] = best_value
         
-        return (memo[0], [])
+        return (memo[0], self.dp_reconstruct_solution(jobs, memo))
     
     def branch_and_bound(self):
         """
@@ -78,9 +103,9 @@ class SchedulingSolver:
         return (0, [])
 
 if __name__ == "__main__":
-    startTimes = [1, 2, 3, 3]
-    endTimes = [3, 4, 5, 6]
-    profit = [50, 10, 40, 70]
+    startTimes = [1,1,1]
+    endTimes = [2,3,4]
+    profit = [5,6,4]
 
     solver = SchedulingSolver(startTimes, endTimes, profit)
 
