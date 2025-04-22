@@ -6,16 +6,17 @@ MATH-339: Optimization (Spring 2025)
 
 Given a set of $n$ tasks with the following features:
 
-\begin{enumerate}
-    \item Start time $s_i$: $s_i \in \Z, 1 \leq s_i \leq 24$
-    \item End time $e_i$: $e_i \in \Z, 1 \leq s_i < e_i \leq 24$
-    \item Profit $p_i$: $p_i \in \Z, 0 \leq p_i$
-    \item Happiness level $h_i$: $h_i \in \Z, 1 \leq h_i \leq 10$
-\end{enumerate}
+* Start time $s_i$: $s_i \in \Z, 1 \leq s_i \leq 24$
+* End time $e_i$: $e_i \in \Z, 1 \leq s_i < e_i \leq 24$
+* Weight $w_i$: $w_i \in \Z, 0 \leq w_i$
 
-We want to compare 2 algorithms that will choose a subset of non-overlapping tasks that obtain the maximum profit:
+We want to compare 2 algorithms that will choose a subset of non-overlapping tasks that obtain the maximum weight:
 
 * Dynamic programming
 * Brute-force branch-and-bound
+
+## Applications in Real-world Data sets
+
+* Flight scheduling that maximizes revenue
 
 
