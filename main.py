@@ -1,8 +1,32 @@
 import copy 
 import heapq
 
+class Task:
+    """
+    Represents a task
+    """
+    def __init__(self, id, start: int, end: int, weight: int):
+        self.id = id
+        self.start = start 
+        self.end = end 
+        self.weight = weight
+    
+    def __str__(self):
+        return f"Task {self.id}, start at: {self.start}, end at: {self.end}, with weight: {self.weight}"
+
 class Node: 
-    def __init__(self, id: int, start: int, end: int, weight: int, selected):
+    """
+    Represents a node/"span" in the "task" tree. Each node has the 
+    following properties:
+    
+    * `start`: start time (integer)
+    * `end`: end time (int)
+    * `weight`: weight (int)
+    * `selected`: list of selected jobs 
+    """
+    count = 0
+    def __init__(self, id: int, start: int, end: int, weight: int, selected: list):
+        Node.count += 1
         self.id = id
         self.start = start 
         self.end = end 
@@ -10,6 +34,9 @@ class Node:
         self.selected = selected[:]
 
 class DecisionTree:
+    """
+    Represents a max heap
+    """
     def __init__(self):
         self.heap = []
     
@@ -31,29 +58,62 @@ class SchedulingSolver:
     we want to return the tasks that are chosen such that the weight is 
     maximized
     """
-    def __init__(self, startTime, endTime, weight):
-        """
-        :type startTime: List[int]
-        :type endTime: List[int]
-        :type weight: List[int]
+    def __init__(self, startTime: list, endTime: list, weight: list, order=1):
+        """        
+        Args:
+            startTime (List[int]): List of start times for all jobs
+            endTime (List[int]): List of end times for all jobs
+            weight (List[int]): List of weight for all jobs to maximize 
         """
         self.n = len(startTime)
         self.startTime = startTime
         self.endTime = endTime
         self.weight = weight
+        self.initialize_jobs(order)
     
-    def find_next_available(self, jobs, i):
+    def initialize_jobs(self, order):
+        """
+        Initialize set of jobs by particular order
+        
+        Args:
+            order (int): 
+            * 1 if order in ascending start time 
+            * 2 if order in ascending end time
+            * 3 if order in ascending profit 
+        """
+        tasks = []
+        
+        # Create a range of tasks
+        for i in range(self.n):
+            t = Task(i, 
+                     start=self.startTime[i],
+                     end=self.endTime[i],
+                     weight=self.weight[i])
+            tasks.append(t)
+        
+        match (order):
+            case 1:
+                self.jobs = sorted(tasks, key=lambda x: x.start)
+            case 2:
+                self.jobs = sorted(tasks, key=lambda x: x.end)
+            case 3:
+                self.jobs = sorted(tasks, key=lambda x: x.weight)
+        
+    
+    def find_next_available(self, jobs: list, i: int):
         """
         Find the nearest job that does not conflict with the ith one
 
-        :type jobs: List[Tuple[int, int, int]]
-        :type i: int
+        Args:
+            jobs: List of jobs in order of ascending start time
+            i: Index of current job to search for the next available on 
 
-        :rtype: int
+        Returns: 
+            int: Index of next available job. -1 if none is found
         """
         for j in range(i+1, self.n):
             # If the start time of jth job is after the end time of the ith job
-            if (jobs[j][0] >= jobs[i][1]):
+            if (jobs[j].start >= jobs[i].end):
                 return j
         return -1
     
@@ -61,10 +121,12 @@ class SchedulingSolver:
         """
         Reconstruct the solution from the memoization table
         
-        :type jobs: List[Tuple[int, int, int]]
-        :type memo: List[int]
+        Args:
+            jobs: List[Task] 
+            memo: List[int]
         
-        :rtype: List[int]
+        Returns: 
+            List[int]
         """
         solution = []
         
@@ -72,7 +134,7 @@ class SchedulingSolver:
             if (i == self.n - 1):
                 solution.append(i)
             else:
-                if (memo[i] == memo[i+1] + jobs[i][2]):
+                if (memo[i] == memo[i+1] + jobs[i].weight):
                     solution.append(i)
                     i = self.find_next_available(jobs, i)
         
@@ -98,36 +160,36 @@ class SchedulingSolver:
         
         Time complexity: O(n^2)
 
-        :rtype: Tuple[int, List[int]]
+        Returns:
+            Tuple[int, List[int]]
         """
-        # Sort jobs by start time
-        jobs = sorted(zip(self.startTime, self.endTime, self.weight), key=lambda v: v[0])
-
+        for j in self.jobs:
+            print(j)
+            
         # Initialize memoization array
         memo = [0] * self.n
         # The maximum profit at the last job is just the last job's value
-        memo[self.n-1] = jobs[self.n-1][2]
+        memo[self.n-1] = self.jobs[self.n-1].weight
         
         for i in range(self.n-2, -1, -1):
-            next_job_id = self.find_next_available(jobs, i)
+            next_job_id = self.find_next_available(self.jobs, i)
             best_value = max(memo[i+1], # not take the job
-                             jobs[i][2] + # take the job
+                             self.jobs[i].weight + # take the job
                              (0 if next_job_id == -1 else memo[next_job_id])) # and add the best profit at the job right after
             # Memoize it
             memo[i] = best_value
         
-        return (memo[0], self.dp_reconstruct_solution(jobs, memo))
+        return (memo[0], self.dp_reconstruct_solution(self.jobs, memo))
     
     def branch_and_bound(self):
         """
         Implementation of branch and bound to return the optimal 
         solution and optimal value
 
-        :rtype: Tuple[int, List[int]]
+        Returns:
+            Tuple[int, List[int]]
         """
-        # Sort jobs by start time
-        jobs = sorted(zip(self.startTime, self.endTime, self.weight), key=lambda v: v[0])
-        print(jobs)
+        # Initialize a tree
         tree = DecisionTree()
         
         root = Node(-1, 0, 0, 0, [])
@@ -141,20 +203,23 @@ class SchedulingSolver:
             # Current cumulative set of jobs 
             span = tree.pop()
             
-            for i, job in enumerate(jobs):
+            # print("Current span: " + span.count)
+            
+            for job in self.jobs:
+                i = job.id
                 # Make sure not to re-select jobs that have been in the schedule
                 if i != span.id and i not in span.selected:
                     # If this job does not conflict
-                    if (job[0] >= span.end):
-                        if (span.weight + job[2] > max_profit):
+                    if (job.start >= span.end):
+                        if (span.weight + job.weight > max_profit):
                             solution = copy.deepcopy(span.selected + [i])
                             
-                        max_profit = max(max_profit, span.weight + job[2])
+                        max_profit = max(max_profit, span.weight + job.weight)
                         
-                        child = Node(i, 
-                                     min(job[0], span.start), 
-                                     max(job[1], span.end),
-                                     span.weight + job[2],
+                        child = Node(i,
+                                     min(job.start, span.start), 
+                                     max(job.end, span.end),
+                                     span.weight + job.weight,
                                      span.selected + [i])
                         
                         tree.push(child)
@@ -163,9 +228,9 @@ class SchedulingSolver:
         
 
 if __name__ == "__main__":
-    startTimes = [1,1,1]
-    endTimes = [2,3,4]
-    profit = [5,6,4]
+    startTimes = [1,2,3,4,6]
+    endTimes = [3,5,10,6,9]
+    profit = [20,20,100,70,60]
 
     solver = SchedulingSolver(startTimes, endTimes, profit)
 
