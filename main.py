@@ -25,9 +25,8 @@ class Node:
     * `selected`: list of selected jobs 
     """
     count = 0
-    def __init__(self, id: int, start: int, end: int, weight: int, selected: list):
+    def __init__(self, start: int, end: int, weight: int, selected: list):
         Node.count += 1
-        self.id = id
         self.start = start 
         self.end = end 
         self.weight = weight
@@ -41,7 +40,7 @@ class DecisionTree:
         self.heap = []
     
     def push(self, node: Node):
-        heapq.heappush(self.heap, (-node.weight, node.id, node))
+        heapq.heappush(self.heap, (-node.weight, node.count, node))
     
     def pop(self):
         if self.heap:
@@ -181,10 +180,22 @@ class SchedulingSolver:
         
         return (memo[0], self.dp_reconstruct_solution(self.jobs, memo))
     
-    def branch_and_bound(self):
+    def decision_tree(self):
         """
-        Implementation of branch and bound to return the optimal 
+        Implementation of decision tree to return the optimal 
         solution and optimal value
+        
+        Decision tree is implemented as a max-heap where the 
+        root is the set of jobs that yields the maximum cumulative
+        weight. 
+        
+        Each time we pop the current most valuable span of jobs out and
+        add another job to the span if it (1) is not already in the span,
+        and (2) doesn't conflict with the end of the span. If the job is
+        mergable, update the span with the added weight and job, then add
+        it to the heap. 
+        
+        The process continues until the tree is emptied. 
 
         Returns:
             Tuple[int, List[int]]
@@ -192,7 +203,7 @@ class SchedulingSolver:
         # Initialize a tree
         tree = DecisionTree()
         
-        root = Node(-1, 0, 0, 0, [])
+        root = Node(0, 0, 0, [])
         
         tree.push(root)
         
@@ -203,12 +214,10 @@ class SchedulingSolver:
             # Current cumulative set of jobs 
             span = tree.pop()
             
-            # print("Current span: " + span.count)
-            
             for job in self.jobs:
                 i = job.id
                 # Make sure not to re-select jobs that have been in the schedule
-                if i != span.id and i not in span.selected:
+                if i not in span.selected:
                     # If this job does not conflict
                     if (job.start >= span.end):
                         if (span.weight + job.weight > max_profit):
@@ -216,8 +225,7 @@ class SchedulingSolver:
                             
                         max_profit = max(max_profit, span.weight + job.weight)
                         
-                        child = Node(i,
-                                     min(job.start, span.start), 
+                        child = Node(min(job.start, span.start), 
                                      max(job.end, span.end),
                                      span.weight + job.weight,
                                      span.selected + [i])
@@ -234,4 +242,4 @@ if __name__ == "__main__":
 
     solver = SchedulingSolver(startTimes, endTimes, profit)
 
-    print(solver.branch_and_bound())
+    print(solver.decision_tree())
