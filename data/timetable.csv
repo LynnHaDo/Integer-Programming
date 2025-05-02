@@ -1,0 +1,27 @@
+﻿Module Unique ID,Module Code,Title,Day,Start Time,End Time,Rating,Timeslot,Day(Num),Timeslot Group,Binary Decision
+1,BS101,Business Strategy,Monday,18:00,20:45,4.3,1,1,1,1
+2,BS101,Business Strategy,Tuesday,18:00,20:45,3.8,2,2,2,0
+3,BS101,Business Strategy,Wednesday,18:00,20:45,3.5,3,3,3,0
+4,BS101,Business Strategy,Friday,18:00,20:45,3.5,4,5,4,0
+5,BS101,Business Strategy,Monday,13:25,14:20,2.3,5,1,5,0
+5,BS101,Business Strategy,Wednesday,13:25,15:15,2.3,6,3,6,0
+6,BS101,Business Strategy,Tuesday,13:25,15:15,1.35,7,2,7,0
+6,BS101,Business Strategy,Thursday,13:25,14:20,1.35,8,4,8,0
+7,FIN300,International Finance,Wednesday,18:00,20:45,3.5,3,3,3,1
+8,FIN300,International Finance,Tuesday,13:25,15:15,1.65,7,2,7,0
+8,FIN300,International Finance,Thursday,13:25,14:20,1.65,8,4,8,0
+9,CS101,Intergenerational Computing,Wednesday,14:30,17:15,4.4,9,3,6,1
+10,CS101,Intergenerational Computing,Thursday,14:30,17:15,3.1,10,4,9,0
+11,CS102,Web Design for Nonprofit Organisations,Tuesday,18:00,20:45,3.7,2,2,2,0
+12,CS102,Web Design for Nonprofit Organisations,Wednesday,14:30,17:15,3.5,11,3,6,0
+13,FIN315,Data Analysis in Finance,Thursday,18:00,20:45,3,12,4,10,1
+14,FIN315,Data Analysis in Finance,Monday,13:25,14:20,1.85,5,1,5,0
+14,FIN315,Data Analysis in Finance,Wednesday,13:25,15:15,1.85,6,3,6,0
+15,FIN316,Risk Management,Monday,18:00,20:45,3.6,1,1,1,0
+16,FIN316,Risk Management,Monday,13:25,15:15,1.95,13,1,5,0
+16,FIN316,Risk Management,Wednesday,13:25,14:20,1.95,14,3,6,0
+17,FIN317,Options Futures and Swaps,Tuesday,18:00,20:45,3.2,2,2,2,0
+18,FIN317,Options Futures and Swaps,Tuesday,13:25,15:15,1.7,7,2,7,1
+18,FIN317,Options Futures and Swaps,Thursday,13:25,14:20,1.7,8,4,8,1
+19,FIN 318,Fixed Instruments and Markets,Monday,18:00,20:45,3,1,1,1,0
+20,FIN 318,Fixed Instruments and Markets,Wednesday,18:00,20:45,3.5,3,3,3,0

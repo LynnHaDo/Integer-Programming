@@ -161,10 +161,7 @@ class SchedulingSolver:
 
         Returns:
             Tuple[int, List[int]]
-        """
-        for j in self.jobs:
-            print(j)
-            
+        """            
         # Initialize memoization array
         memo = [0] * self.n
         # The maximum profit at the last job is just the last job's value
