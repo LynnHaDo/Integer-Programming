@@ -1,5 +1,5 @@
 import copy 
-
+import time
 from models import DecisionTree, Node, Task
 
 class SchedulingSolver:
@@ -20,6 +20,8 @@ class SchedulingSolver:
         self.endTime = endTime
         self.weight = weight
         self.initialize_jobs(order)
+    
+    # SET-UP        =================================================== 
     
     def initialize_jobs(self, order):
         """
@@ -48,7 +50,8 @@ class SchedulingSolver:
                 self.jobs = sorted(tasks, key=lambda x: x.end)
             case 3:
                 self.jobs = sorted(tasks, key=lambda x: x.weight)
-        
+    
+    # HELPERS      =================================================== 
     
     def find_next_available(self, jobs: list, i: int):
         """
@@ -89,7 +92,23 @@ class SchedulingSolver:
                     i = self.find_next_available(jobs, i)
         
         return solution
-                
+    
+    def __str__(self):        
+        begin = time.time()
+        dp_res = self.dp()
+        time.sleep(1)
+        end = time.time()
+        dp_dur = end - begin
+            
+        begin1 = time.time()
+        dt_res = self.decision_tree()
+        time.sleep(1)
+        end1 = time.time()
+        dt_dur = end1 - begin1
+        
+        return f"== Dynamic Programming (without constraint)\nResult: {dp_res}\nRun-time: {dp_dur}\n== Decision Tree (without constraint)\nResult: {dt_res}\nRun-time: {dt_dur}\n"
+    
+    # ALGORITHMS    ===================================================            
 
     def dp(self):
         """
@@ -181,13 +200,3 @@ class SchedulingSolver:
                         tree.push(child)
 
         return (max_profit, solution)
-        
-
-if __name__ == "__main__":
-    startTimes = [1,2,3,4,6]
-    endTimes = [3,5,10,6,9]
-    profit = [20,20,100,70,60]
-
-    solver = SchedulingSolver(startTimes, endTimes, profit)
-
-    print(solver.decision_tree())

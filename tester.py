@@ -8,6 +8,15 @@ if __name__ == "__main__":
     time_converter = TimeConverter()
     
     # Test on timetable data
+    print("SIMPLE EXAMPLE ======")
+    startTimes = [1,2,3,4,6]
+    endTimes = [3,5,10,6,9]
+    profit = [20,20,100,70,60]
+
+    solver = SchedulingSolver(startTimes, endTimes, profit)
+    print(solver)
+    
+    # Test on timetable data
     print("TIMETABLE OPTIMIZATION ======")
     
     with open("data/timetable.csv", "r") as f:
@@ -35,18 +44,9 @@ if __name__ == "__main__":
         
         # Feed it to the solver
         solver = SchedulingSolver(start, end, ratings)
+        # Print result
+        print(solver)
         
-        begin = time.time()
-        print(solver.dp())
-        time.sleep(1)
-        end = time.time()
-        print(f"Total runtime of DP approach is {end - begin}")
-        
-        begin1 = time.time()
-        print(solver.decision_tree())
-        time.sleep(1)
-        end1 = time.time()
-        print(f"Total runtime of decision-tree approach is {end1 - begin1}")
     
     # Test on airplane data
     print("AIRPLANE OPTIMIZATION ======")
@@ -73,17 +73,7 @@ if __name__ == "__main__":
         
         # Feed it to the solver
         solver = SchedulingSolver(start, end, ratings)
-        
-        begin = time.time()
-        print(solver.dp())
-        time.sleep(1)
-        end = time.time()
-        print(f"Total runtime of DP approach is {end - begin}")
-        
-        begin1 = time.time()
-        print(solver.decision_tree())
-        time.sleep(1)
-        end1 = time.time()
-        print(f"Total runtime of decision-tree approach is {end1 - begin1}")
+        # Print result 
+        print(solver)
     
     
