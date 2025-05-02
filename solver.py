@@ -147,6 +147,9 @@ class SchedulingSolver:
         
         return (memo[0], self.dp_reconstruct_solution(self.jobs, memo))
     
+    def multiple_choice_dp(self, classes: list):
+        pass
+    
     def decision_tree(self):
         """
         Implementation of decision tree to return the optimal 
