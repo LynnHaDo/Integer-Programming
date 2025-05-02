@@ -1,9 +1,11 @@
 from solver import SchedulingSolver
 
 # Time utils
-from utils.time import day_and_time_to_int
+from utils import TimeConverter
 
 if __name__ == "__main__":
+    time_converter = TimeConverter()
+    
     # Test on timetable data
     with open("data/timetable.csv", "r") as f:
         start = []
@@ -20,8 +22,8 @@ if __name__ == "__main__":
             line_arr = line.split(",")
             d,s,e,r = line_arr[3:7]
             
-            s = day_and_time_to_int(d,s)
-            e = day_and_time_to_int(d,e)
+            s = time_converter.day_and_time_to_int(d,s)
+            e = time_converter.day_and_time_to_int(d,e)
             r = float(r)
             
             start.append(s)
