@@ -75,8 +75,8 @@ class SchedulingSolver:
         Reconstruct the solution from the memoization table
         
         Args:
-            jobs: List[Task] 
-            memo: List[int]
+            jobs: List of jobs in order of ascending start time
+            memo: memoization table
         
         Returns: 
             List[int]
