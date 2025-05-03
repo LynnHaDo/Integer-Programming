@@ -1,23 +1,22 @@
-from solver import SchedulingSolver
+from models.solver import SchedulingSolver
 
 # Time utils
 from utils import TimeConverter
 import time 
 
+# Test suite
+import unittest
+from tests import TestGeneral
+
 if __name__ == "__main__":
     time_converter = TimeConverter()
+    padding = "=" * 30
+    print(f"{padding}\t\tGENERAL\t{padding}")
+    suite = unittest.TestLoader().loadTestsFromTestCase(TestGeneral)
+    unittest.TextTestRunner(verbosity=2).run(suite)
     
     # Test on timetable data
-    print("SIMPLE EXAMPLE ======")
-    startTimes = [1,2,3,4,6]
-    endTimes = [3,5,10,6,9]
-    profit = [20,20,100,70,60]
-
-    solver = SchedulingSolver(startTimes, endTimes, profit)
-    print(solver)
-    
-    # Test on timetable data
-    print("TIMETABLE OPTIMIZATION ======")
+    print(f"{padding}\t\tTIMETABLE\t{padding}")
     
     with open("data/timetable.csv", "r") as f:
         start = []
@@ -49,7 +48,7 @@ if __name__ == "__main__":
         
     
     # Test on airplane data
-    print("AIRPLANE OPTIMIZATION ======")
+    print(f"{padding}\t\tAIR FLIGHTS\t{padding}")
     
     with open("data/flights.txt", "r") as f:
         start = []
