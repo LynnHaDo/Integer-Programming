@@ -105,5 +105,5 @@ class TestTimetable(unittest.TestCase):
     def testBnB(self):
         bnb_optimal_value, bnb_x, depth = self.solver.branch_and_bound()
         bnb_x_str = [str(x) for x in bnb_x]
-        print(f"{PURPLE}Branch and Bound selected courses: {', '.join(bnb_x_str)}{RESET}\nDepth: {depth}\n")
+        print(f"{PURPLE}Branch and Bound selected courses: {', '.join(bnb_x_str)}\nDepth: {depth}\n{RESET}")
         self.assertEqual(self.z, bnb_optimal_value)

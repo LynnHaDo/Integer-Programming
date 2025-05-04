@@ -9,10 +9,8 @@ from utils import RED, GREEN, RESET
 import unittest
 from tests import TestGeneral, TestTimetable, TestFlights
 
-if __name__ == "__main__":
-    time_converter = TimeConverter()
-    
-    padding = "=" * 50
+if __name__ == "__main__":    
+    padding = "=" * 53
     print(f"\n{GREEN}UNIT TESTS\t{padding}{RESET}\n")
     print(f"{RED}Leetcode Examples{RESET}\n")
     general_suite = unittest.TestLoader().loadTestsFromTestCase(TestGeneral)
