@@ -66,6 +66,3 @@ class TestGeneral(unittest.TestCase):
     def test_three_bnb(self):
         bnb_sol = self.solver3.branch_and_bound()
         self.assertEqual(6, bnb_sol[1])
-
-if __name__ == '__main__':
-    unittest.main()
