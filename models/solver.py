@@ -297,12 +297,15 @@ class SchedulingSolver:
             depth_result: list where the depth of the branch will be stored
         
         Returns:
-            Tuple[int] 
+            Tuple[int] | None
             * optimal value (-np.inf if infeasible/omitted) 
             * optimal solution ([] if infeasible/omitted) \n
             * depth: depth of the tree
         """
-        x, z, depth = self.recursive_branch_and_bound(self.lb, self.ub)
+        res = self.recursive_branch_and_bound(self.lb, self.ub)
+        if res is None:
+            return None 
+        x, z, depth = res
         x_result[0] = x 
         z_result[0] = z 
         depth_result[0] = depth
@@ -343,7 +346,7 @@ class SchedulingSolver:
 
         # Check if LP is feasible
         if not res.success:
-            return [], -np.inf, depth
+            return None
         
         # Candidate for the optimal value and the objective value
         x_candidate, z_candidate = res.x, res.fun
@@ -399,5 +402,3 @@ class SchedulingSolver:
                     else: 
                         return x_right, z_right, depth_right
                 return None 
-        
-                
