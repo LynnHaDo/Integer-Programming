@@ -316,6 +316,20 @@ class SchedulingSolver:
         return (max_profit, solution)
     
     def branch_and_bound(self, x_result=[None], z_result=[None], depth_result=[None]):
+        """
+        Caller of recursive branch and bound 
+        
+        Args:
+            x_result: list where the optimal solution will be stored
+            z_result: list where the optimal value will be stored
+            depth_result: list where the depth of the branch will be stored
+        
+        Returns:
+            Tuple[int] 
+            * optimal solution ([] if infeasible/omitted)
+            * optimal value (-np.inf if infeasible/omitted) \n
+            * depth: depth of the tree
+        """
         x, z, depth = self.recursive_branch_and_bound(self.lb, self.ub)
         x_result[0] = x 
         z_result[0] = z 
@@ -341,7 +355,7 @@ class SchedulingSolver:
         Returns:
             Tuple[int] 
             * optimal solution ([] if infeasible/omitted)
-            * optimal value (-np.inf if infeasible/omitted) \n
+            * optimal value (-np.inf if infeasible/omitted) 
             * depth: depth of the tree
         """
         # Optimal solution for LP relaxation
