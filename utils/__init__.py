@@ -1,2 +1,2 @@
 from .time import TimeConverter
-from .colors import RED, GREEN, RESET, PURPLE
+from .constants import RED, GREEN, RESET, PURPLE, TIMEOUT

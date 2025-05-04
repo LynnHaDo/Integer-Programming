@@ -5,7 +5,7 @@ from utils import TimeConverter
 
 from amplpy import AMPL
 
-from utils import GREEN, RESET, PURPLE
+from utils import GREEN, RESET, PURPLE, TIMEOUT
 
 import time 
 from threading import Thread
@@ -85,45 +85,50 @@ class TestFlights(unittest.TestCase):
                 if self.x[i].value() == 1:
                     selected.append(f"{i}")
                     
-            print(f"{GREEN}AMPL selected flights: {', '.join(selected)}{RESET}\n")
+            print(f"{GREEN}AMPL selected flights: {', '.join(selected)}{RESET}")
             
             # Get the optimal value
             self.z = ampl.get_value('z')
             
     def testDP(self):
+        # Start the timer 
+        begin = time.time()
         dp_optimal_value, dp_x = self.solver.dp()
+        end = time.time()
         dp_x_str = [str(x) for x in dp_x]
-        print(f"{PURPLE}DP selected courses: {', '.join(dp_x_str)}{RESET}\n")
+        print(f"{PURPLE}DP selected flights: {', '.join(dp_x_str)}\n>\tRun-time: {end - begin}{RESET}")
         self.assertEqual(self.z, dp_optimal_value)
     
     def testDT(self):
-        begin = time.time() 
         x_result = [None]
         z_result = [None]
         th = Thread(target=self.solver.decision_tree, args=(x_result, z_result))
         th.daemon = True
+        begin = time.time() 
         th.start() 
-        th.join(timeout=10)
-        if (time.time() - begin > 10):
-            print("Decision tree took too long to compute!")
+        th.join(timeout=TIMEOUT)
+        if (time.time() - begin > TIMEOUT):
+            print(f"{PURPLE}Decision tree took too long to compute!{RESET}")
             return
+        end = time.time()
         dt_x_str = [str(x) for x in x_result]
-        print(f"{PURPLE}Decision tree selected courses: {', '.join(dt_x_str)}{RESET}\n")
+        print(f"{PURPLE}Decision tree selected flights: {', '.join(dt_x_str)}\n>\tRun-time: {end - begin}{RESET}")
         self.assertEqual(self.z, z_result[0])
     
     def testBnB(self):
-        begin = time.time() 
         x_result = [None]
         z_result = [None]
         depth_result = [None]
         th = Thread(target=self.solver.branch_and_bound, args=(x_result, z_result, depth_result))
         th.daemon = True
+        begin = time.time() 
         th.start() 
-        th.join(timeout=10)
-        if (time.time() - begin > 10):
-            print("Branch and Bound took too long to compute!")
+        th.join(timeout=TIMEOUT)
+        if (time.time() - begin > TIMEOUT):
+            print(f"{PURPLE}Branch and Bound took too long to compute!{RESET}")
             return
+        end = time.time()
         bnb_optimal_value = z_result[0]
         bnb_x_str = [str(x) for x in x_result]
-        print(f"{PURPLE}Branch and Bound selected courses: {', '.join(bnb_x_str)}\nDepth: {depth_result[0]}\n{RESET}")
+        print(f"{PURPLE}Branch and Bound selected flights: {', '.join(bnb_x_str)}\n>\tRun-time: {end-begin}\n>\tDepth: {depth_result[0]}{RESET}")
         self.assertEqual(self.z, bnb_optimal_value)

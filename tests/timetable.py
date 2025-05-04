@@ -2,6 +2,7 @@ import unittest
 
 from models import SchedulingSolver
 from utils import TimeConverter
+import time
 
 from amplpy import AMPL
 
@@ -85,25 +86,34 @@ class TestTimetable(unittest.TestCase):
                 if self.x[i].value() == 1:
                     selected.append(f"{i}")
                     
-            print(f"{GREEN}AMPL selected courses: {', '.join(selected)}{RESET}\n")
+            print(f"{GREEN}AMPL selected courses: {', '.join(selected)}{RESET}")
             
             # Get the optimal value
             self.z = ampl.get_value('z')
             
     def testDP(self):
+        # Start the timer
+        begin = time.time()
         dp_optimal_value, dp_x = self.solver.dp()
+        end = time.time()
         dp_x_str = [str(x) for x in dp_x]
-        print(f"{PURPLE}DP selected courses: {', '.join(dp_x_str)}{RESET}\n")
+        print(f"{PURPLE}DP selected courses: {', '.join(dp_x_str)}\n>\tRun-time: {end - begin}{RESET}")
         self.assertEqual(self.z, dp_optimal_value)
     
     def testDT(self):
+        # Start the timer
+        begin = time.time()
         dt_optimal_value, dt_x = self.solver.decision_tree()
+        end = time.time()
         dt_x_str = [str(x) for x in dt_x]
-        print(f"{PURPLE}Decision tree selected courses: {', '.join(dt_x_str)}{RESET}\n")
+        print(f"{PURPLE}Decision tree selected courses: {', '.join(dt_x_str)}\n>\tRun-time: {end - begin}{RESET}")
         self.assertEqual(self.z, dt_optimal_value)
     
     def testBnB(self):
+        # Start the timer
+        begin = time.time()
         bnb_optimal_value, bnb_x, depth = self.solver.branch_and_bound()
+        end = time.time()
         bnb_x_str = [str(x) for x in bnb_x]
-        print(f"{PURPLE}Branch and Bound selected courses: {', '.join(bnb_x_str)}\nDepth: {depth}\n{RESET}")
+        print(f"{PURPLE}Branch and Bound selected courses: {', '.join(bnb_x_str)}\n>\tRun-time: {end-begin}\n>\tDepth: {depth}{RESET}")
         self.assertEqual(self.z, bnb_optimal_value)
