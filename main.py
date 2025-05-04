@@ -9,14 +9,18 @@ import unittest
 from tests import TestGeneral
 
 if __name__ == "__main__":
+    GREEN = '\033[32m'
+    RESET = '\033[0m'
     time_converter = TimeConverter()
-    padding = "=" * 30
-    print(f"{padding}\t\tGENERAL\t{padding}")
+    
+    padding = "=" * 50
+    print(f"{GREEN}GENERAL\t{padding}{RESET}\n")
     suite = unittest.TestLoader().loadTestsFromTestCase(TestGeneral)
     unittest.TextTestRunner(verbosity=2).run(suite)
     
+    print("\n")
     # Test on timetable data
-    print(f"{padding}\t\tTIMETABLE\t{padding}")
+    print(f"{GREEN}TIMETABLE\t{padding}{RESET}\n")
     
     with open("data/timetable.csv", "r") as f:
         start = []
@@ -46,9 +50,9 @@ if __name__ == "__main__":
         # Print result
         print(solver)
         
-    
+    print("\n")
     # Test on airplane data
-    print(f"{padding}\t\tAIR FLIGHTS\t{padding}")
+    print(f"{GREEN}AIR FLIGHTS\t{padding}{RESET}\n")
     
     with open("data/flights.txt", "r") as f:
         start = []

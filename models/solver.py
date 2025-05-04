@@ -191,20 +191,22 @@ class SchedulingSolver:
             A[i][ov_pairs[i][1]] = 1
         return A
     
-    def __str__(self):        
+    def __str__(self):   
+        RED = '\033[31m'     
+        RESET = '\033[0m'
         begin = time.time()
         dp_res = self.dp()
         time.sleep(1)
         end = time.time()
         dp_dur = end - begin
-        dp_str = f"== Dynamic Programming (without constraint)\nResult: {dp_res}\nRun-time: {dp_dur}\n"
+        dp_str = f"{RED}Dynamic Programming{RESET}\nResult: {dp_res}\nRun-time: {dp_dur}\n"
             
         begin1 = time.time()
         dt_res = self.decision_tree()
         time.sleep(1)
         end1 = time.time()
         dt_dur = end1 - begin1
-        dt_str = f"== Decision Tree (without constraint)\nResult: {dt_res}\nRun-time: {dt_dur}\n"
+        dt_str = f"{RED}Decision Tree{RESET}\nResult: {dt_res}\nRun-time: {dt_dur}\n"
         
         begin2 = time.time() 
         x_result = [None]
@@ -215,12 +217,13 @@ class SchedulingSolver:
         th.start() 
         th.join(timeout=10)
         if (time.time() - begin2 > 10):
-            return dp_str + dt_str + "== Branch and Bound\nBranch and Bound took to long to run!"
+            bnb_str = f"{RED}Branch and Bound{RESET}\nBranch and Bound took too long to run!"
+            return "\n".join([dp_str, dt_str, bnb_str])
         end2 = time.time()
         bnb_dur = end2 - begin2
         bnb_res = (z_result[0], x_result[0], depth_result[0])
-        bnb_str = f"== Branch and Bound\nResult: {bnb_res}\nRun-time: {bnb_dur}\n"
-        return  dp_str + dt_str + bnb_str
+        bnb_str = f"{RED}Branch and Bound{RESET}\nResult: {bnb_res}\nRun-time: {bnb_dur}\n"
+        return  "\n".join([dp_str, dt_str, bnb_str])
     
     # ALGORITHMS    ===================================================            
 
@@ -353,7 +356,7 @@ class SchedulingSolver:
             depth: the depth of the tree
         
         Returns:
-            Tuple[int] 
+            Tuple[int] | None
             * optimal solution ([] if infeasible/omitted)
             * optimal value (-np.inf if infeasible/omitted) 
             * depth: depth of the tree
@@ -377,7 +380,7 @@ class SchedulingSolver:
         # If the value is less than the current best solution,
         # don't bother going further
         if (z_candidate < self.z_optimal):
-            return [], -np.inf, depth
+            return None
         
         # Check the optimal solution to see if any is non-integer
         is_int = True 
@@ -400,22 +403,28 @@ class SchedulingSolver:
                 left_lb = np.copy(lb)
                 left_ub = np.copy(ub)
                 left_ub[i] = np.floor(x_candidate[i])
-                x_left, z_left, depth_left = self.recursive_branch_and_bound(left_lb, 
-                                                                             left_ub, 
-                                                                             depth + 1)
+                left_res = self.recursive_branch_and_bound(left_lb, left_ub, depth + 1)
+                if left_res is not None:
+                    x_left, z_left, depth_left = left_res
 
                 # Right branch: x_i >= ceil(x_i)
                 right_lb = np.copy(lb)     
                 right_ub = np.copy(ub) 
                 right_lb[i] = np.ceil(x_candidate[i])
-                x_right, z_right, depth_right = self.recursive_branch_and_bound(right_lb, 
-                                                                                right_ub, 
-                                                                                depth + 1)
+                right_res = self.recursive_branch_and_bound(right_lb, right_ub, depth + 1)
+                if right_res is not None:
+                    x_right, z_right, depth_right = right_res
 
                 # Return the best solution
-                if(z_left > z_right):
-                    return x_left, z_left, depth_left
-                else: 
+                if left_res is None and right_res is not None:
                     return x_right, z_right, depth_right
+                elif left_res is not None and right_res is None:
+                    return x_left, z_left, depth_left
+                elif left_res is not None and right_res is not None:
+                    if(z_left > z_right):
+                        return x_left, z_left, depth_left
+                    else: 
+                        return x_right, z_right, depth_right
+                return None 
         
                 
