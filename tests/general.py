@@ -37,7 +37,7 @@ class TestGeneral(unittest.TestCase):
     
     def test_one_bnb(self):
         bnb_sol = self.solver1.branch_and_bound()
-        self.assertEqual(150, bnb_sol[1])
+        self.assertEqual(150, bnb_sol[0])
     
     # Test 2 =======================================================
     
@@ -51,7 +51,7 @@ class TestGeneral(unittest.TestCase):
     
     def test_two_bnb(self):
         bnb_sol = self.solver2.branch_and_bound()
-        self.assertEqual(120, bnb_sol[1])
+        self.assertEqual(120, bnb_sol[0])
     
     # Test 3 =======================================================
     
@@ -65,4 +65,4 @@ class TestGeneral(unittest.TestCase):
     
     def test_three_bnb(self):
         bnb_sol = self.solver3.branch_and_bound()
-        self.assertEqual(6, bnb_sol[1])
+        self.assertEqual(6, bnb_sol[0])

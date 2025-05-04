@@ -5,6 +5,7 @@ import numpy as np
 import math
 from . import DecisionTree, Node, Task
 
+from utils import RED, RESET
 from threading import Thread
 
 class SchedulingSolver:
@@ -63,9 +64,9 @@ class SchedulingSolver:
         self.c = np.array(self.weight)
         
         # Constraint
-        cts = self.overlapping_pairs()
-        self.A = self.compute_matrix_A(cts)
-        self.b = np.ones(len(cts))
+        self.cts = self.overlapping_pairs()
+        self.A = self.compute_matrix_A(self.cts)
+        self.b = np.ones(len(self.cts))
         
         # Lower bound for each decision var 
         self.lb = np.zeros(self.n)
@@ -191,40 +192,6 @@ class SchedulingSolver:
             A[i][ov_pairs[i][1]] = 1
         return A
     
-    def __str__(self):   
-        RED = '\033[31m'     
-        RESET = '\033[0m'
-        begin = time.time()
-        dp_res = self.dp()
-        time.sleep(1)
-        end = time.time()
-        dp_dur = end - begin
-        dp_str = f"{RED}Dynamic Programming{RESET}\nResult: {dp_res}\nRun-time: {dp_dur}\n"
-            
-        begin1 = time.time()
-        dt_res = self.decision_tree()
-        time.sleep(1)
-        end1 = time.time()
-        dt_dur = end1 - begin1
-        dt_str = f"{RED}Decision Tree{RESET}\nResult: {dt_res}\nRun-time: {dt_dur}\n"
-        
-        begin2 = time.time() 
-        x_result = [None]
-        z_result = [None]
-        depth_result = [None]
-        th = Thread(target=self.branch_and_bound, args=(x_result, z_result, depth_result))
-        th.daemon = True
-        th.start() 
-        th.join(timeout=10)
-        if (time.time() - begin2 > 10):
-            bnb_str = f"{RED}Branch and Bound{RESET}\nBranch and Bound took too long to run!"
-            return "\n".join([dp_str, dt_str, bnb_str])
-        end2 = time.time()
-        bnb_dur = end2 - begin2
-        bnb_res = (z_result[0], x_result[0], depth_result[0])
-        bnb_str = f"{RED}Branch and Bound{RESET}\nResult: {bnb_res}\nRun-time: {bnb_dur}\n"
-        return  "\n".join([dp_str, dt_str, bnb_str])
-    
     # ALGORITHMS    ===================================================            
 
     def dp(self):
@@ -264,7 +231,7 @@ class SchedulingSolver:
         
         return (memo[0], self.dp_reconstruct_solution(self.jobs, memo))
     
-    def decision_tree(self):
+    def decision_tree(self, x_result = [None], z_result = [None]):
         """
         Implementation of decision tree to return the optimal 
         solution and optimal value
@@ -315,7 +282,9 @@ class SchedulingSolver:
                                      span.selected + [i])
                         
                         tree.push(child)
-
+                        
+        x_result[0] = solution
+        z_result[0] = max_profit
         return (max_profit, solution)
     
     def branch_and_bound(self, x_result=[None], z_result=[None], depth_result=[None]):
@@ -329,15 +298,19 @@ class SchedulingSolver:
         
         Returns:
             Tuple[int] 
-            * optimal solution ([] if infeasible/omitted)
-            * optimal value (-np.inf if infeasible/omitted) \n
+            * optimal value (-np.inf if infeasible/omitted) 
+            * optimal solution ([] if infeasible/omitted) \n
             * depth: depth of the tree
         """
         x, z, depth = self.recursive_branch_and_bound(self.lb, self.ub)
         x_result[0] = x 
         z_result[0] = z 
         depth_result[0] = depth
-        return x,z,depth
+        res = []
+        for i in range(self.n):
+            if x[i] == 1:
+                res.append(i)
+        return z,res,depth
     
     def recursive_branch_and_bound(self, lb, ub, depth = 1):
         """
