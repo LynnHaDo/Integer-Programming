@@ -1,12 +1,8 @@
 import copy 
-import time
 import scipy
 import numpy as np
 import math
 from . import DecisionTree, Node, Task
-
-from utils import RED, RESET
-from threading import Thread
 
 class SchedulingSolver:
     """
