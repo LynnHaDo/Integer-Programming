@@ -285,7 +285,7 @@ class SchedulingSolver:
                         
         x_result[0] = solution
         z_result[0] = max_profit
-        return (max_profit, solution)
+        return (max_profit, sorted(solution))
     
     def branch_and_bound(self, x_result=[None], z_result=[None], depth_result=[None]):
         """
