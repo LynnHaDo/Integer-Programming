@@ -75,7 +75,9 @@ class TestTimetable(unittest.TestCase):
             
             # Solve 
             ampl.option["solver"] = "gurobi"
+            solver_begin = time.time()
             ampl.solve()
+            solver_end = time.time()
             
             # Get the solution
             self.x = ampl.get_variable("x")
@@ -86,7 +88,7 @@ class TestTimetable(unittest.TestCase):
                 if self.x[i].value() == 1:
                     selected.append(f"{i}")
                     
-            print(f"{GREEN}AMPL selected courses: {', '.join(selected)}{RESET}")
+            print(f"{GREEN}AMPL selected courses: {', '.join(selected)}\n>\tRun-time: {solver_end - solver_begin}{RESET}")
             
             # Get the optimal value
             self.z = ampl.get_value('z')
