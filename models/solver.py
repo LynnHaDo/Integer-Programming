@@ -34,7 +34,7 @@ class SchedulingSolver:
         Initialize set of jobs by ascending start time 
         """
         tasks = []
-        
+
         # Create a range of tasks
         for i in range(self.n):
             t = Task(i, 
@@ -76,17 +76,17 @@ class SchedulingSolver:
         self.x_optimal = x
         self.z_optimal = z
         self.depth = depth
-        
     
     # HELPERS      =================================================== 
     
-    def find_next_available(self, jobs: list, i: int):
+    def find_next_available(self, jobs: list, i: int, group_mode = False):
         """
-        Find the nearest job that does not conflict with the ith one
+        Find the nearest job that does not conflict with the ith one. 
 
         Args:
             jobs: List of jobs in order of ascending start time
-            i: Index of current job to search for the next available on 
+            i: Index of current job to search for the next available one 
+            group_mode: whether or not to select the next available one (in a different group)
 
         Returns: 
             int: Index of next available job. -1 if none is found
@@ -94,6 +94,10 @@ class SchedulingSolver:
         for j in range(i+1, self.n):
             # If the start time of jth job is after the end time of the ith job
             if (jobs[j].start >= jobs[i].end):
+                if not group_mode:
+                    return j
+                if jobs[j].group == jobs[i].group:
+                    continue 
                 return j
         return -1
     
@@ -226,6 +230,24 @@ class SchedulingSolver:
             memo[i] = best_value
         
         return (memo[0], self.dp_reconstruct_solution(self.jobs, memo))
+    
+    def multiple_choice_dp(self):
+        memo = [0] * self.n 
+        memo[self.n-1] = self.jobs[self.n-1].weight
+        
+        for i in range(self.n-2, -1, -1):
+            # (1) take this job
+            # Then find the next available one 
+            next_job_id = self.find_next_available(self.jobs, i, True)
+            p1 = self.jobs[i].weight + 0 if next_job_id == -1 else memo[next_job_id]
+            
+            # (2) Not take this job
+            # Case 1: best so far of the last processed job
+            p2 = memo[i+1]
+            
+            memo[i] = max(p1, p2)
+            
+        return memo[0]
     
     def decision_tree(self, x_result = [None], z_result = [None]):
         """

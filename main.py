@@ -1,17 +1,13 @@
-# Time utils
-from utils import TimeConverter
-import time 
-
 # Colors (for formatting)
 from utils import RED, GREEN, RESET
 
 # Test suite
 import unittest
-from tests import TestGeneral, TestTimetable, TestFlights
+from tests import TestGeneral, TestTimetable, TestFlights, TestTimetableMCKS
 
 if __name__ == "__main__":    
-    padding = "=" * 53
-    print(f"\n{GREEN}UNIT TESTS\t{padding}{RESET}\n")
+    padding = "=" * 40
+    print(f"\n{GREEN}TASK SCHEDULING [WITHOUT CONSTRAINTS]\t{padding}{RESET}\n")
     print(f"{RED}Leetcode Examples{RESET}\n")
     general_suite = unittest.TestLoader().loadTestsFromTestCase(TestGeneral)
     unittest.TextTestRunner(verbosity=2).run(general_suite)
@@ -23,3 +19,11 @@ if __name__ == "__main__":
     print(f"\n{RED}Flights (against AMPL){RESET}\n")
     flights_suite = unittest.TestLoader().loadTestsFromTestCase(TestFlights)
     unittest.TextTestRunner(verbosity=2).run(flights_suite)
+    
+    print(f"\n{GREEN}TASK SCHEDULING [WITH CONSTRAINTS]\t{padding}{RESET}\n")
+    
+    print(f"\n{RED}Timetable (AMPL){RESET}\n")
+    timetable_mc_suite = unittest.TestLoader().loadTestsFromTestCase(TestTimetableMCKS)
+    unittest.TextTestRunner(verbosity=2).run(timetable_mc_suite)
+    
+    

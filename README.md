@@ -72,6 +72,10 @@ Example with `flights.txt` data set:
 * Object initialization
 
 ```
+from utils import TimeConverter
+
+time_converter = TimeConverter()
+
 with open("data/flights.txt", "r") as f:
     start = []
     end = []
@@ -99,9 +103,9 @@ with open("data/flights.txt", "r") as f:
 * Run each method: 
 
 ```
-solver.dp() # DP
-solver.decision_tree() # Decision tree
-solver.branch_and_bound() # Branch and Bound
+print(solver.dp()) # DP
+print(solver.decision_tree()) # Decision tree
+print(solver.branch_and_bound()) # Branch and Bound
 ```
 
 ### Run unit tests
