@@ -98,6 +98,11 @@ class TestTimetable(unittest.TestCase):
         begin = time.time()
         dp_optimal_value, dp_x = self.solver.dp()
         end = time.time()
+        dp_sum = 0
+        for i in range(self.solver.n):
+            if self.solver.jobs[i].id in dp_x:
+                dp_sum += self.solver.jobs[i].weight
+        self.assertEqual(self.z, dp_sum)
         dp_x_str = [str(x) for x in dp_x]
         print(f"{PURPLE}DP selected courses: {', '.join(dp_x_str)}\n>\tRun-time: {end - begin}{RESET}")
         self.assertEqual(self.z, dp_optimal_value)
@@ -107,6 +112,11 @@ class TestTimetable(unittest.TestCase):
         begin = time.time()
         dt_optimal_value, dt_x = self.solver.decision_tree()
         end = time.time()
+        dt_sum = 0
+        for i in range(self.solver.n):
+            if self.solver.jobs[i].id in dt_x:
+                dt_sum += self.solver.jobs[i].weight
+        self.assertEqual(self.z, dt_sum)
         dt_x_str = [str(x) for x in dt_x]
         print(f"{PURPLE}Decision tree selected courses: {', '.join(dt_x_str)}\n>\tRun-time: {end - begin}{RESET}")
         self.assertEqual(self.z, dt_optimal_value)
@@ -116,6 +126,12 @@ class TestTimetable(unittest.TestCase):
         begin = time.time()
         bnb_optimal_value, bnb_x, depth = self.solver.branch_and_bound()
         end = time.time()
+        bnb_sum = 0
+        print(bnb_x)
+        for i in range(self.solver.n):
+            if self.solver.jobs[i].id in bnb_x:
+                bnb_sum += self.solver.jobs[i].weight
+        self.assertEqual(self.z, bnb_sum)
         bnb_x_str = [str(x) for x in bnb_x]
         print(f"{PURPLE}Branch and Bound selected courses: {', '.join(bnb_x_str)}\n>\tRun-time: {end-begin}\n>\tDepth: {depth}{RESET}")
         self.assertEqual(self.z, bnb_optimal_value)

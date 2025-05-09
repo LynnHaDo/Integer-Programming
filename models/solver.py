@@ -79,50 +79,48 @@ class SchedulingSolver:
     
     # HELPERS      =================================================== 
     
-    def find_next_available(self, jobs: list, i: int, group_mode = False):
+    def find_next_available(self, i: int):
         """
         Find the nearest job that does not conflict with the ith one. 
 
         Args:
-            jobs: List of jobs in order of ascending start time
             i: Index of current job to search for the next available one 
-            group_mode: whether or not to select the next available one (in a different group)
 
         Returns: 
             int: Index of next available job. -1 if none is found
         """
         for j in range(i+1, self.n):
             # If the start time of jth job is after the end time of the ith job
-            if (jobs[j].start >= jobs[i].end):
-                if not group_mode:
-                    return j
-                if jobs[j].group == jobs[i].group:
-                    continue 
+            if (self.jobs[j].start >= self.jobs[i].end):
                 return j
         return -1
     
-    def dp_reconstruct_solution(self, jobs, memo):
+    def dp_reconstruct_solution(self, memo, selected):
         """
         Reconstruct the solution from the memoization table
         
         Args:
-            jobs: List of jobs in order of ascending start time
             memo: memoization table
         
         Returns: 
             List[int]
         """
         solution = []
-        
-        for i in range(self.n):
-            if (i == self.n - 1):
-                solution.append(i)
+        i = 0
+        while i < self.n:
+            if (selected[i] == -1):
+                solution.append(self.jobs[i].id)
+                break
+            if (memo[i] == memo[i+1]):
+                i += 1
             else:
-                if (memo[i] == memo[i+1] + jobs[i].weight):
-                    solution.append(i)
-                    i = self.find_next_available(jobs, i)
+                solution.append(self.jobs[i].id)
+                next_id = self.find_next_available(i)
+                if next_id == -1:
+                    break 
+                i = next_id 
         
-        return solution
+        return sorted(solution)
     
     def is_overlapping(self, s1, e1, s2, e2):
         """
@@ -221,33 +219,22 @@ class SchedulingSolver:
         # The maximum profit at the last job is just the last job's value
         memo[self.n-1] = self.jobs[self.n-1].weight
         
-        for i in range(self.n-2, -1, -1):
-            next_job_id = self.find_next_available(self.jobs, i)
-            best_value = max(memo[i+1], # not take the job
-                             self.jobs[i].weight + # take the job
-                             (0 if next_job_id == -1 else memo[next_job_id])) # and add the best profit at the job right after
-            # Memoize it
-            memo[i] = best_value
-        
-        return (memo[0], self.dp_reconstruct_solution(self.jobs, memo))
-    
-    def multiple_choice_dp(self):
-        memo = [0] * self.n 
-        memo[self.n-1] = self.jobs[self.n-1].weight
+        # Array to store the next job to consider 
+        next_job = [-1] * self.n 
         
         for i in range(self.n-2, -1, -1):
-            # (1) take this job
-            # Then find the next available one 
-            next_job_id = self.find_next_available(self.jobs, i, True)
-            p1 = self.jobs[i].weight + 0 if next_job_id == -1 else memo[next_job_id]
+            next_job_id = self.find_next_available(i)
+            not_take_value = memo[i+1]
+            take_value = self.jobs[i].weight + (0 if next_job_id == -1 else memo[next_job_id])
             
-            # (2) Not take this job
-            # Case 1: best so far of the last processed job
-            p2 = memo[i+1]
-            
-            memo[i] = max(p1, p2)
-            
-        return memo[0]
+            if take_value > not_take_value:
+                memo[i] = take_value
+                next_job[i] = next_job_id
+            else:
+                memo[i] = not_take_value 
+                next_job[i] = i+1
+                
+        return (memo[0], self.dp_reconstruct_solution(memo, next_job))
     
     def decision_tree(self, x_result = [None], z_result = [None]):
         """
@@ -328,10 +315,10 @@ class SchedulingSolver:
         z_result[0] = z 
         depth_result[0] = depth
         res = []
-        for i in range(self.n):
-            if x[i] == 1:
+        for i, x_i in enumerate(x):
+            if x_i == 1:
                 res.append(i)
-        return z,res,depth
+        return z,sorted(res),depth
     
     def recursive_branch_and_bound(self, lb, ub, depth = 1):
         """
@@ -388,7 +375,7 @@ class SchedulingSolver:
         if is_int:
             if z_candidate > self.z_optimal:
                 self.set_optimal_bound(x_candidate, z_candidate, depth)
-            return x_candidate, z_candidate, depth
+            return self.x_optimal, self.z_optimal, self.depth
         
         # Branch on the first non-integer variable
         for i in range(self.n):

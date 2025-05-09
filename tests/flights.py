@@ -97,6 +97,11 @@ class TestFlights(unittest.TestCase):
         begin = time.time()
         dp_optimal_value, dp_x = self.solver.dp()
         end = time.time()
+        dp_sum = 0
+        for i in range(self.solver.n):
+            if self.solver.jobs[i].id in dp_x:
+                dp_sum += self.solver.jobs[i].weight
+        self.assertEqual(self.z, dp_sum)
         dp_x_str = [str(x) for x in dp_x]
         print(f"{PURPLE}DP selected flights: {', '.join(dp_x_str)}\n>\tRun-time: {end - begin}{RESET}")
         self.assertEqual(self.z, dp_optimal_value)
