@@ -5,6 +5,8 @@ MATH-339: Optimization (Spring 2025)
 ## Table of Content
 
 * [Problem Formulation](#problem)
+    * [IP](#ip)
+    * [LP relaxation Problem vs. Dual](#duality-comparison-between-lp-relaxation-and-its-dual)
     * [Applications in Real-world Data sets](#applications-in-real-world-data-sets)
 * [Libraries and Packages](#libraries-and-packages)
 * [Installation](#installation)
@@ -14,6 +16,8 @@ MATH-339: Optimization (Spring 2025)
 
 ## Problem
 
+### IP
+
 Given a set of $n$ tasks with the following features:
 
 * Start time $s_i$: $s_i \in \mathbb{Z}, 1 \leq s_i \leq 24$
@@ -22,9 +26,7 @@ Given a set of $n$ tasks with the following features:
 
 Want to maximize: 
 
-<p style="align: center;">
-    $\sum_{i=1}^{n}w_ix_i$
-</p>
+$\sum_{i=1}^{n}w_ix_i$
 
 where $x_i$ is a binary variable representing the choice of task in the final subset. 
 
@@ -33,6 +35,18 @@ We want to compare 3 algorithms that will choose a subset of non-overlapping tas
 * Dynamic programming
 * Brute-force branch-and-bound
 * Decision tree
+
+### Duality: Comparison between LP relaxation and its Dual 
+
+The LP relaxation of the IP problem is as follows:
+
+\begin{align*}
+    &\max &\sum_{i=1}^{n} x_ip_i \\
+    &\text{such that } \quad &x_i + x_j \leq 1 &\quad \text{for all } i,j \text{ overlap} \\ 
+    & & x_i \leq 1 &\quad \text{for } i = 1, 2, ..., n \\ 
+    & & 0 \leq x_i &\quad \text{for } i = 1, 2, ..., n
+\end{align*}
+
 
 ### Applications in Real-world Data sets
 
