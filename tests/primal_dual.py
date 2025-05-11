@@ -5,6 +5,8 @@ from utils import TimeConverter
 
 from amplpy import AMPL
 
+import math
+
 from utils import GREEN, RESET, PURPLE
 
 class TestDualPrimal(unittest.TestCase):
@@ -43,17 +45,28 @@ class TestDualPrimal(unittest.TestCase):
     
             # Set up AMPL
             self.ampl = AMPL()
-        
-    def setUp(self):
-        super().setUp()
-        
-        self.initialize_data()
-        
-        ## PRIMAL       ====================================================
+            self.ampl.option["solver"] = "gurobi"
+    
+    def setup_primal(self):
         constraints = ""
-            
+        
+        self.dual_overlap_vars = {}
+        self.c_vars = []
         for i, pair in enumerate(self.overlapping_pairs):
-            constraints += f"s.t. c{i}: x[{pair[0]}] + x[{pair[1]}] <= 1;\n"
+            c_name = f"c_{pair[0]}_{pair[1]}"
+            
+            if pair[0] in self.dual_overlap_vars:
+                self.dual_overlap_vars[pair[0]].add(c_name)
+            else:
+                self.dual_overlap_vars[pair[0]] = set([c_name]) 
+            if pair[1] in self.dual_overlap_vars:
+                self.dual_overlap_vars[pair[1]].add(c_name)
+            else:
+                self.dual_overlap_vars[pair[1]] = set([c_name]) 
+                
+            constraints += f"s.t. {c_name}: x[{pair[0]}] + x[{pair[1]}] <= 1;\n"
+            
+            self.c_vars.append(c_name)
             
         # Define the model
         model = f"""
@@ -77,7 +90,6 @@ class TestDualPrimal(unittest.TestCase):
             self.ampl.eval(f"fix COST[{i}] := {c};")
             
         # Solve 
-        self.ampl.option["solver"] = "gurobi"
         self.ampl.solve()
             
         # Get the solution
@@ -92,37 +104,23 @@ class TestDualPrimal(unittest.TestCase):
         self.primal_val = self.ampl.get_value('z')
                     
         print(f"{GREEN}AMPL Primal LP solution: {', '.join(self.primal_sol)}\n>\tOptimal value: {self.primal_val}{RESET}")
-        
-        ## DUAL       ===================================================
-        self.ampl.reset()
+    
+    def setup_dual(self):
+        self.ampl.reset() # reset everything from primal
 
-        overlap_dict = {}
+        c_str = [f"var {c} >= 0;\n" for c in self.c_vars]
         
-        for i, pair in enumerate(self.overlapping_pairs):
-            if pair[0] not in overlap_dict:
-                overlap_dict[pair[0]] = [pair[1]]
-            else:
-                overlap_dict[pair[0]].append(pair[1])
-
         dual_constraints = ""
         
-        # Tasks that don't overlap with anything
         for i in range(self.solver.n):
             cts = f"s.t. overlap_{i}: "
-            if i not in overlap_dict:
+            if i not in self.dual_overlap_vars:
                 cts += f"s[{i}] >= p[{i}];\n"
             else:
-                overlaps_with_i = overlap_dict[i]
-                overlap_terms = [f"c_{i}_{j}" for j in overlaps_with_i]
-                overlap_terms_str = " + ".join(overlap_terms)
+                overlaps_with_i = self.dual_overlap_vars[i]
+                overlap_terms_str = " + ".join(overlaps_with_i)
                 cts += f"{overlap_terms_str} + s[{i}] >= p[{i}];\n"
             dual_constraints += cts   
-            
-        c_terms = [f"c_{i}_{j}" for (i,j) in self.overlapping_pairs]
-        c_terms = set(c_terms)
-        c_str = ""
-        for term in c_terms:
-            c_str += f"var {term} >= 0;\n" 
             
         # Define the model
         model = f"""
@@ -132,23 +130,21 @@ class TestDualPrimal(unittest.TestCase):
             var p{{RANGE}};
             
             # Dual vars constraint: >= 0
-            {c_str}
+            {''.join(c_str)}
             var s{{RANGE}} >= 0;
             
-            minimize z: {" + ".join(c_terms)} + sum{{k in RANGE}} s[k];
+            minimize z: {" + ".join(self.c_vars)} + sum{{k in RANGE}} s[k];
             
             # Profit is less than or equal to 'overlapping' cost + s[i]
             {dual_constraints} 
             """
-        print(model)
         self.ampl.eval(model)
             
         # Fill in the cost 
-        for i, c in enumerate(self.ratings):
-            self.ampl.eval(f"fix p[{i}] := {c};")
-            
+        for i, r in enumerate(self.ratings):
+            self.ampl.eval(f"fix p[{i}] := {r};")
+
         # Solve 
-        self.ampl.option["solver"] = "gurobi"
         self.ampl.solve()
             
         # Get the solution
@@ -156,9 +152,8 @@ class TestDualPrimal(unittest.TestCase):
             
         # Print out the result of AMPL
         self.dual_sol_c = {}
-        for pair in self.overlapping_pairs:
-            c = f"c_{pair[0]}_{pair[1]}"
-            self.dual_sol_c[c] = self.ampl.get_value(c)
+        for c_term in self.c_vars:
+            self.dual_sol_c[c_term] = self.ampl.get_variable(c_term).value()
             
         self.dual_sol_s = []
         for i in range(self.solver.n):
@@ -168,6 +163,17 @@ class TestDualPrimal(unittest.TestCase):
         self.dual_val = self.ampl.get_value('z')
                     
         print(f"{PURPLE}AMPL Dual LP solution:\n>\tc = {self.dual_sol_c}\n>\ts = {', '.join(self.dual_sol_s)}\n>\tOptimal value: {self.dual_val}{RESET}")
+    
+    def setUp(self):
+        super().setUp()
+        
+        self.initialize_data()
+        
+        ## PRIMAL       ====================================================
+        self.setup_primal()
+        
+        ## DUAL       ===================================================
+        self.setup_dual()
             
     def testCompareDualvsPrimal(self):
-        self.assertEqual(self.primal_val, self.dual_val)
+        self.assertTrue(math.isclose(self.primal_val, self.dual_val))
