@@ -40,12 +40,12 @@ We want to compare 3 algorithms that will choose a subset of non-overlapping tas
 
 The LP relaxation of the IP problem is as follows:
 
-\begin{aligned}
+$\begin{align*}
     &\max &\sum_{i=1}^{n} x_ip_i \\
     &\text{such that } \quad &x_i + x_j \leq 1 &\quad \text{for all } i,j \text{ overlap} \\ 
     & & x_i \leq 1 &\quad \text{for } i = 1, 2, ..., n \\ 
     & & 0 \leq x_i &\quad \text{for } i = 1, 2, ..., n
-\end{aligned}
+\end{align*}$
 
 
 ### Applications in Real-world Data sets
